@@ -11,5 +11,5 @@ jobs:
     - stage: Install
       script: mvn clean install
 
-#notification:
-#  email: st.a.tarasenko@gmail.com
+notification:
+  email: st.a.tarasenko@gmail.com
