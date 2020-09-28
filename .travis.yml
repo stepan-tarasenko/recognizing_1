@@ -11,10 +11,10 @@ deploy:
   provider: releases
   api_key: "$GITHUB_TOKEN"
   file: "./target/recognizing_1-1.0-SNAPSHOT.jar"
-  skip_cleanup: true
+  cleanup: true
   overwrite: true
   on:
     tags: true
 
-notification:
+notifications:
   email: st.a.tarasenko@gmail.com
