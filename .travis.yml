@@ -13,8 +13,6 @@ deploy:
   file: "./target/recognizing_1-1.0-SNAPSHOT.jar"
   cleanup: true
   overwrite: true
-  on:
-    tags: true
 
 notifications:
   email: st.a.tarasenko@gmail.com
