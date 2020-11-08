@@ -1,4 +1,3 @@
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
@@ -8,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,7 +43,7 @@ public class Utils {
                 Objects.requireNonNull(
                         Utils.class.getClassLoader().getResourceAsStream(path)
                 ),
-                Charsets.UTF_8
+                StandardCharsets.UTF_8
         );
     }
 
@@ -51,6 +51,6 @@ public class Utils {
         byte[] fileBytes = FileUtils.readFileToByteArray(
                 new File(Utils.class.getResource(path).toURI())
         );
-        return new String(fileBytes, Charsets.UTF_8);
+        return new String(fileBytes, StandardCharsets.UTF_8);
     }
 }

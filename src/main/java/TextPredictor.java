@@ -24,7 +24,7 @@ public class TextPredictor {
     }
 
     private void printPredictedText(Map.Entry<int[][], Double> picture) {
-        int lastIndex = picture.getKey()[0].length - 1;
+        int lastIndex = picture.getKey()[0].length;
         double maxProb = -Double.MAX_VALUE;
         for (Map.Entry<String, MetaData> entry : graph.get(lastIndex).entrySet()){
             if (entry.getValue().getProbability() > maxProb) {
@@ -33,7 +33,7 @@ public class TextPredictor {
         }
         for (Map.Entry<String, MetaData> entry : graph.get(lastIndex).entrySet()){
             if (entry.getValue().getProbability() == maxProb) {
-                System.out.println(entry.getKey() + entry.getValue().getWord());
+                System.out.println(entry.getValue().getWord());
             }
         }
     }
@@ -101,7 +101,7 @@ public class TextPredictor {
 
     private void initGraph(int[][] picture, double noiseProbability) {
         graph.clear();
-        for (int i = 0; i < picture[0].length; i++) {
+        for (int i = 0; i < picture[0].length + 1; i++) {
             graph.add(i, new Hashtable<>());
         }
         for (Map.Entry<String, int[][]> entry : alphabet.entrySet()) {
@@ -117,13 +117,13 @@ public class TextPredictor {
             if (!bigramsProbability.isEmpty()) {
                 probability += Math.log(bigramsProbability.get(" " + entry.getKey()));
             }
-            graph.get(currentWidth - 1).put(entry.getKey(), new MetaData("", probability));
+            graph.get(currentWidth).put(entry.getKey(), new MetaData(entry.getKey(), probability));
         }
         System.out.println(graph.toString());
     }
 
     public void predictTextOnPicture(int[][] picture, double noiseProbability) {
-        for (int i = 0; i < picture[0].length; i++) {
+        for (int i = 0; i < picture[0].length + 1; i++) {
             for (Map.Entry<String, int[][]> letter : alphabet.entrySet()) {
                 int currentWidth = letter.getValue()[0].length;
                 if (i < currentWidth || graph.get(i - currentWidth).isEmpty()) {
@@ -137,7 +137,7 @@ public class TextPredictor {
 
                     int[][] currentCharacter = new int[letter.getValue().length][];
                     for (int j = 0; j < currentCharacter.length; j++) {
-                        currentCharacter[j] = Arrays.copyOfRange(picture[j], i - currentWidth + 1, i + 1);
+                        currentCharacter[j] = Arrays.copyOfRange(picture[j], i - currentWidth, i);
                     }
 
                     double currentProbability = calculateProbability(
@@ -157,7 +157,6 @@ public class TextPredictor {
                         maxProb = newProbability;
                         bestSequence = prevString + letter.getKey();
                     }
-
                     graph.get(i).put(letter.getKey(), new MetaData(bestSequence, maxProb));
                 }
             }
