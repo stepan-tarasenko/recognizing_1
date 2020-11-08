@@ -82,8 +82,20 @@ public class TextPredictor {
                 sum += tempArray[i][j];
             }
         }
-        return Math.log(noiseProbability / (1 - noiseProbability)) * sum + Math.log(1 - noiseProbability)
+        double res = Math.log(noiseProbability / (1 - noiseProbability)) * sum + Math.log(1 - noiseProbability)
                 * noisedArray.length * noisedArray[0].length;
+
+        if (noiseProbability == 0.0) {
+            if (Double.isNaN(res)) {
+                return Float.MAX_VALUE;
+            } else if (Double.isInfinite(res)) {
+                return -Float.MAX_VALUE;
+            }
+        } else if (noiseProbability == 1.0){
+            res = Math.log(noiseProbability / (1 - noiseProbability + epsilon)) * sum + Math.log(1 - noiseProbability + epsilon)
+                    * noisedArray.length * noisedArray[0].length;
+        }
+        return res;
     }
 
     private void initGraph(int[][] picture, double noiseProbability) {
