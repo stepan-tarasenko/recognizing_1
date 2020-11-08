@@ -1,5 +1,8 @@
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 public class Main {
-    public static void main(String[] args) {
-        System.out.println(args.length > 0? "Hello, " + args[0] : "Hello, world!");
+    public static void main(String[] args) throws IOException, URISyntaxException {
+        new TextPredictor().main();
     }
 }
