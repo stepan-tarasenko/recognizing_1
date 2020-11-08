@@ -3,27 +3,29 @@ import java.net.URISyntaxException;
 import java.util.*;
 
 public class TextPredictor {
-    private Map<String, int[][]> alphabet = new Hashtable<>();
-    private Map<int[][], Double> inputPictures = new Hashtable<>();
-    private Map<String, Double> bigramsProbability = new Hashtable<>();
-    private ArrayList<Map<String, MetaData>> graph = new ArrayList<>();
-    private double epsilon = 1e-16;
+    private static Map<String, int[][]> alphabet = new Hashtable<>();
+    private static Map<String, Map<int[][], Double>> inputPictures = new Hashtable<>();
+    private static Map<String, Double> bigramsProbability = new Hashtable<>();
+    private static ArrayList<Map<String, MetaData>> graph = new ArrayList<>();
+    public static double epsilon = 1e-16;
 
     public void main() throws IOException, URISyntaxException {
-        initAlphabet();
-        initInputArrays();
+        initAlphabet(alphabet);
+        initInputArrays(inputPictures);
         bigramsProbability = Collections.emptyMap();
 
-        for (Map.Entry<int[][], Double> picture : inputPictures.entrySet()) {
-            System.out.println("Picture length: " + picture.getKey()[0].length);
-            System.out.println("Picture noise: " + picture.getValue());
-            initGraph(picture.getKey(), picture.getValue());
-            predictTextOnPicture(picture.getKey(), picture.getValue());
-            printPredictedText(picture);
+        for (Map.Entry<String, Map<int[][], Double>> picture : inputPictures.entrySet()) {
+            for (Map.Entry<int[][], Double> pic : picture.getValue().entrySet()) {
+                System.out.println("Picture length: " + pic.getKey()[0].length);
+                System.out.println("Picture noise: " + pic.getValue());
+                initGraph(pic.getKey(), pic.getValue(), graph, alphabet, bigramsProbability);
+                predictTextOnPicture(pic.getKey(), pic.getValue(), graph, bigramsProbability, alphabet);
+                System.out.println(getPredictedText(pic, graph));
+            }
         }
     }
 
-    private void printPredictedText(Map.Entry<int[][], Double> picture) {
+    public static String getPredictedText(Map.Entry<int[][], Double> picture, ArrayList<Map<String, MetaData>> graph) {
         int lastIndex = picture.getKey()[0].length;
         double maxProb = -Double.MAX_VALUE;
         for (Map.Entry<String, MetaData> entry : graph.get(lastIndex).entrySet()){
@@ -33,12 +35,13 @@ public class TextPredictor {
         }
         for (Map.Entry<String, MetaData> entry : graph.get(lastIndex).entrySet()){
             if (entry.getValue().getProbability() == maxProb) {
-                System.out.println(entry.getValue().getWord());
+                return entry.getValue().getWord();
             }
         }
+        return "";
     }
 
-    private void initAlphabet() throws IOException, URISyntaxException {
+    public static void initAlphabet(Map<String, int[][]> alphabet) throws IOException, URISyntaxException {
         List<String> files = Utils.readAllFilesInPath(Utils.ALPHABET_DIR);
 
         for (String fileName : files) {
@@ -57,20 +60,23 @@ public class TextPredictor {
         }
     }
 
-    private void initInputArrays() throws URISyntaxException, IOException {
+    public static List<String> initInputArrays(Map<String, Map<int[][], Double>> input) throws URISyntaxException, IOException {
         List<String> files = Utils.readAllFilesInPath(Utils.INPUT_DIR);
 
         for (String fileName : files) {
             String probabilityNoise = fileName.split("_")[1];
-            inputPictures.put(
+            Map<int[][], Double> curMap = new Hashtable<>();
+            curMap.put(
                     Utils.readPictureAsArray(Utils.INPUT_DIR + fileName),
                     Double.parseDouble(probabilityNoise.substring(0, probabilityNoise.length() - 4))
             );
+            input.put(fileName, curMap);
             System.out.println(fileName + " was initialized!");
         }
+        return files;
     }
 
-    private double calculateProbability(int[][] noisedArray, int[][] etaloneArray, double noiseProbability) {
+    public static double calculateProbability(int[][] noisedArray, int[][] etaloneArray, double noiseProbability) {
         int[][] tempArray = new int[noisedArray.length][noisedArray[0].length];
         for (int i = 0; i < noisedArray.length; i++) {
             for (int j = 0; j < noisedArray[i].length; j++) {
@@ -99,7 +105,12 @@ public class TextPredictor {
         return res;
     }
 
-    private void initGraph(int[][] picture, double noiseProbability) {
+    public static void initGraph(int[][] picture,
+                                 double noiseProbability,
+                                 ArrayList<Map<String, MetaData>> graph,
+                                 Map<String, int[][]> alphabet,
+                                 Map<String, Double> bigramsProbability
+                                 ) {
         graph.clear();
         for (int i = 0; i < picture[0].length + 1; i++) {
             graph.add(i, new Hashtable<>());
@@ -122,7 +133,13 @@ public class TextPredictor {
         System.out.println(graph.toString());
     }
 
-    public void predictTextOnPicture(int[][] picture, double noiseProbability) {
+    public static void predictTextOnPicture(
+            int[][] picture,
+            double noiseProbability,
+            ArrayList<Map<String, MetaData>> graph,
+            Map<String, Double> bigramsProbability,
+            Map<String, int[][]> alphabet
+                                     ) {
         for (int i = 0; i < picture[0].length + 1; i++) {
             for (Map.Entry<String, int[][]> letter : alphabet.entrySet()) {
                 int currentWidth = letter.getValue()[0].length;
