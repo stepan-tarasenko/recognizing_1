@@ -45,4 +45,21 @@ public class TextPredictor {
             System.out.println(fileName + " was initialized!");
         }
     }
+
+    private double calculateProbability(int[][] noisedArray, int[][] etaloneArray, double noiseProbability) {
+        int[][] tempArray = new int[noisedArray.length][noisedArray[0].length];
+        for (int i = 0; i < noisedArray.length; i++) {
+            for (int j = 0; j < noisedArray[i].length; j++) {
+                tempArray[i][j] = (noisedArray[i][j] ^ etaloneArray[i][j]);
+            }
+        }
+        double sum = 0.0;
+        for (int i = 0; i < noisedArray.length; i++) {
+            for (int j = 0; j < noisedArray[i].length; j++) {
+                sum += tempArray[i][j];
+            }
+        }
+        return Math.log(noiseProbability / (1 - noiseProbability)) * sum + Math.log(1 - noiseProbability)
+                * noisedArray.length * noisedArray[0].length;
+    }
 }
