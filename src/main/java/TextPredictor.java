@@ -1,13 +1,12 @@
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TextPredictor {
     private Map<String, int[][]> alphabet = new Hashtable<>();
     private Map<int[][], Double> inputPictures = new Hashtable<>();
-
+    private Map<String, Double> bigramsProbability = new Hashtable<>();
+    private ArrayList<Map<String, MetaData>> graph = new ArrayList<>();
 
     public void main() throws IOException, URISyntaxException {
         initAlphabet();
@@ -61,5 +60,28 @@ public class TextPredictor {
         }
         return Math.log(noiseProbability / (1 - noiseProbability)) * sum + Math.log(1 - noiseProbability)
                 * noisedArray.length * noisedArray[0].length;
+    }
+
+    private void initGraph(int[][] picture, double noiseProbability) {
+        graph.clear();
+        for (int i = 0; i < picture[0].length; i++) {
+            graph.add(i, new Hashtable<>());
+        }
+        for (Map.Entry<String, int[][]> entry : alphabet.entrySet()) {
+            int currentWidth = entry.getValue()[0].length;
+
+            int[][] currentCharacter = new int[entry.getValue().length][];
+            for (int j = 0; j < currentCharacter.length; j++) {
+                currentCharacter[j] = Arrays.copyOfRange(picture[j], 0, currentWidth);
+            }
+
+            double probability = calculateProbability(currentCharacter, entry.getValue(), noiseProbability);
+
+            if (!bigramsProbability.isEmpty()) {
+                probability += Math.log(bigramsProbability.get(" " + entry.getKey()));
+            }
+            graph.get(currentWidth - 1).put(entry.getKey(), new MetaData("", probability));
+        }
+        System.out.println(graph.toString());
     }
 }
