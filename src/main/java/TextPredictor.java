@@ -7,6 +7,7 @@ public class TextPredictor {
     private Map<int[][], Double> inputPictures = new Hashtable<>();
     private Map<String, Double> bigramsProbability = new Hashtable<>();
     private ArrayList<Map<String, MetaData>> graph = new ArrayList<>();
+    private double epsilon = 1e-16;
 
     public void main() throws IOException, URISyntaxException {
         initAlphabet();
