@@ -1,3 +1,5 @@
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -12,7 +14,7 @@ public class TextPredictor {
     public void main() throws IOException, URISyntaxException {
         initAlphabet(alphabet);
         initInputArrays(inputPictures);
-        bigramsProbability = Collections.emptyMap();
+        initBigramsProbabilities(bigramsProbability, alphabet);
 
         for (Map.Entry<String, Map<int[][], Double>> picture : inputPictures.entrySet()) {
             for (Map.Entry<int[][], Double> pic : picture.getValue().entrySet()) {
@@ -21,6 +23,28 @@ public class TextPredictor {
                 initGraph(pic.getKey(), pic.getValue(), graph, alphabet, bigramsProbability);
                 predictTextOnPicture(pic.getKey(), pic.getValue(), graph, bigramsProbability, alphabet);
                 System.out.println(getPredictedText(pic, graph));
+            }
+        }
+    }
+
+    public static void initBigramsProbabilities(Map<String, Double> bigramsProbability,
+                                                Map<String, int[][]> alphabet
+    ) throws URISyntaxException, IOException {
+        JSONObject jsonObject = new JSONObject(Utils.readJsonFromFileAsString(Utils.JSON_PATH));
+        int totalOccurrence = 0;
+        for (String bigram : jsonObject.keySet()) {
+            totalOccurrence += jsonObject.getInt(bigram);
+        }
+
+        for (String bigram : jsonObject.keySet()) {
+            bigramsProbability.put(bigram, jsonObject.getDouble(bigram) / totalOccurrence);
+        }
+
+        for (String l1 : alphabet.keySet()) {
+            for (String l2 : alphabet.keySet()) {
+                if (!bigramsProbability.containsKey(l1.concat(l2))) {
+                    bigramsProbability.put(l1.concat(l2), 0d);
+                }
             }
         }
     }

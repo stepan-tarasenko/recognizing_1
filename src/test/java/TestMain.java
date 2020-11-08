@@ -17,6 +17,7 @@ public class TestMain {
     @Before
     public void init() throws IOException, URISyntaxException {
         TextPredictor.initAlphabet(alphabet);
+        TextPredictor.initBigramsProbabilities(bigramsProbability, alphabet);
     }
 
     @Test
